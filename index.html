@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YumGo — Online Food Ordering Simulation & Food Crew Challenge</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        yumgo: {
+                            DEFAULT: '#06c167',
+                            dark: '#059c53',
+                            light: '#e6f8ef',
+                            accent: '#ffc107'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: manipulation;
+        }
+        /* Custom scrollbar for touch friendliness */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #06c167;
+            border-radius: 4px;
+        }
+        @keyframes starExplosion {
+            0% { transform: scale(0.2) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.4) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 0; }
+        }
+        .animate-star-explode {
+            animation: starExplosion 1.2s ease-in-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col select-none">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Logo & Brand -->
+            <button onclick="switchScreen('home')" class="flex items-center gap-3 focus:outline-none group">
+                <div class="bg-yumgo text-white p-3 rounded-2xl shadow-md group-hover:bg-yumgo-dark transition transform group-hover:scale-105">
+                    <i class="fa-solid fa-utensils text-2xl sm:text-3xl"></i>
+                </div>
+                <div class="text-left">
+                    <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">Yum<span class="text-yumgo">Go</span></span>
+                    <span class="block text-xs font-medium text-gray-500">ESL Classroom Edition</span>
+                </div>
+            </button>
+
+            <!-- Navigation Actions -->
+            <div class="flex items-center gap-3 sm:gap-4">
+                <button onclick="switchScreen('home')" class="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition">
+                    <i class="fa-solid fa-house"></i> Home
+                </button>
+                <!-- Cart Button (Game 1 Only) -->
+                <button id="nav-cart-btn" onclick="openCartModal()" class="relative flex items-center gap-2.5 bg-yumgo hover:bg-yumgo-dark text-white px-5 py-3 rounded-2xl font-bold shadow-lg shadow-yumgo/30 transition transform active:scale-95">
+                    <i class="fa-solid fa-cart-shopping text-lg"></i>
+                    <span class="hidden md:inline">Cart</span>
+                    <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold border-2 border-white shadow">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col">
+
+        <!-- SCREEN 1: HOMEPAGE (Game Selection) -->
+        <section id="screen-home" class="flex-1 flex flex-col items-center justify-center text-center py-12 animate-fade-in">
+            <div class="max-w-4xl mx-auto space-y-6">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yumgo-light text-yumgo font-bold text-sm sm:text-base shadow-sm">
+                    <i class="fa-solid fa-graduation-cap"></i> Elementary ESL Classroom Edition
+                </div>
+                <h1 class="text-4xl sm:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight">
+                    Welcome to <span class="text-yumgo underline decoration-yumgo/30">YumGo!</span>
+                </h1>
+                <p class="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
+                    Choose an activity below to practice English, explore global cuisines, and have fun in the classroom!
+                </p>
+
+                <!-- Game Selection Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 max-w-3xl mx-auto w-full">
+                    <!-- Game 1 Card -->
+                    <div class="bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl border border-gray-100 flex flex-col items-center text-center transition transform hover:-translate-y-1.5 cursor-pointer group" onclick="startOrdering()">
+                        <div class="w-20 h-20 rounded-2xl bg-yumgo text-white flex items-center justify-center text-3xl mb-6 shadow-md group-hover:scale-110 transition duration-300">
+                            <i class="fa-solid fa-basket-shopping"></i>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-gray-900 mb-2">Game 1: Food Ordering</h3>
+                        <p class="text-sm text-gray-500 mb-6">Browse international menus, practice natural sentence patterns, and build your food order.</p>
+                        <span class="inline-flex items-center gap-2 bg-yumgo-light text-yumgo font-bold px-6 py-3 rounded-2xl group-hover:bg-yumgo group-hover:text-white transition">
+                            Play Game 1 <i class="fa-solid fa-arrow-right"></i>
+                        </span>
+                    </div>
+
+                    <!-- Game 2 Card -->
+                    <div class="bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl border border-gray-100 flex flex-col items-center text-center transition transform hover:-translate-y-1.5 cursor-pointer group" onclick="startCrewChallenge()">
+                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center text-3xl mb-6 shadow-md group-hover:scale-110 transition duration-300">
+                            <i class="fa-solid fa-users-gear"></i>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-gray-900 mb-2">Game 2: Food Crew Challenge</h3>
+                        <p class="text-sm text-gray-500 mb-6">3-player split screen! Receive customer orders, select items correctly, and earn stars.</p>
+                        <span class="inline-flex items-center gap-2 bg-orange-50 text-orange-600 font-bold px-6 py-3 rounded-2xl group-hover:bg-orange-500 group-hover:text-white transition">
+                            Play Game 2 <i class="fa-solid fa-arrow-right"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Highlights -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-16 max-w-4xl w-full">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center">
+                    <div class="w-12 h-12 bg-yumgo-light text-yumgo rounded-xl flex items-center justify-center text-xl mb-4">
+                        <i class="fa-solid fa-earth-americas"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-lg mb-1">5 Global Cuisines</h3>
+                    <p class="text-sm text-gray-500">Italian, Japanese, Taiwanese, American, and Vietnamese dishes.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center">
+                    <div class="w-12 h-12 bg-yumgo-light text-yumgo rounded-xl flex items-center justify-center text-xl mb-4">
+                        <i class="fa-solid fa-comments"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-lg mb-1">ESL Sentence Practice</h3>
+                    <p class="text-sm text-gray-500">Real-time sentence helper reflecting your exact items and quantities.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center">
+                    <div class="w-12 h-12 bg-yumgo-light text-yumgo rounded-xl flex items-center justify-center text-xl mb-4">
+                        <i class="fa-solid fa-hand-pointer"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-lg mb-1">Touchscreen Friendly</h3>
+                    <p class="text-sm text-gray-500">Optimized for classroom displays, tablets, and computers.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: CUISINE SELECTION -->
+        <section id="screen-cuisines" class="flex-1 flex flex-col py-6 hidden animate-fade-in">
+            <div class="text-center mb-8">
+                <button onclick="switchScreen('home')" class="inline-flex items-center gap-2 text-yumgo font-bold text-sm hover:underline mb-3">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Game Selection
+                </button>
+                <span class="block text-yumgo font-bold tracking-wider uppercase text-sm">Step 1 of 4</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-1">“What food do you want?”</h2>
+                <p class="text-gray-500 mt-2">Choose a cuisine category to explore the menu.</p>
+            </div>
+
+            <!-- Cuisine Grid -->
+            <div id="cuisine-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto w-full pb-12">
+                <!-- Dynamically populated -->
+            </div>
+        </section>
+
+        <!-- SCREEN 3: FOOD MENU -->
+        <section id="screen-menu" class="flex-1 flex flex-col py-6 hidden animate-fade-in">
+            <!-- Menu Header & Back Button -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-200">
+                <div>
+                    <button onclick="switchScreen('cuisines')" class="inline-flex items-center gap-2 text-yumgo font-bold text-sm hover:underline mb-2">
+                        <i class="fa-solid fa-arrow-left"></i> Choose Another Cuisine
+                    </button>
+                    <h2 id="menu-cuisine-title" class="text-3xl font-extrabold text-gray-900 capitalize">Cuisine Menu</h2>
+                </div>
+                <!-- Sentence Helper Banner -->
+                <div class="bg-yumgo-light border border-yumgo/30 px-5 py-3 rounded-2xl max-w-xl flex items-center gap-3">
+                    <i class="fa-solid fa-comment-dots text-yumgo text-xl"></i>
+                    <div>
+                        <span class="text-xs font-bold text-yumgo-dark uppercase block">ESL Sentence Practice</span>
+                        <p id="sentence-helper-text" class="text-sm font-semibold text-gray-800 italic">"I want to order food."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Food Items Grid -->
+            <div id="food-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-16">
+                <!-- Dynamically populated food cards -->
+            </div>
+        </section>
+
+        <!-- SCREEN 5: CHECKOUT -->
+        <section id="screen-checkout" class="flex-1 flex flex-col py-6 max-w-3xl mx-auto w-full hidden animate-fade-in">
+            <div class="mb-6">
+                <button onclick="openCartModal()" class="inline-flex items-center gap-2 text-yumgo font-bold text-sm hover:underline mb-2">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Cart
+                </button>
+                <h2 class="text-3xl font-extrabold text-gray-900">Checkout</h2>
+                <p class="text-gray-500 mt-1">Review your order details and place your classroom order.</p>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 sm:p-8 space-y-6">
+                <!-- Student Name Field -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Student / Customer Name</label>
+                    <input type="text" id="student-name-input" placeholder="Enter student or group name (e.g. Group A / Alex)" class="w-full px-4 py-3 rounded-2xl border border-gray-300 focus:ring-2 focus:ring-yumgo focus:border-yumgo outline-none text-base">
+                </div>
+
+                <!-- Delivery Method Selector -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Delivery Method</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="flex items-center gap-3 p-4 rounded-2xl border-2 border-yumgo bg-yumgo-light cursor-pointer">
+                            <input type="radio" name="delivery-method" value="delivery to school" checked class="text-yumgo focus:ring-yumgo w-5 h-5">
+                            <div>
+                                <span class="block font-bold text-gray-900">Delivery to School</span>
+                                <span class="text-xs text-gray-500">Classroom 402</span>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 rounded-2xl border-2 border-gray-200 hover:border-gray-300 cursor-pointer">
+                            <input type="radio" name="delivery-method" value="delivery to home" class="text-yumgo focus:ring-yumgo w-5 h-5">
+                            <div>
+                                <span class="block font-bold text-gray-900">Delivery to Home</span>
+                                <span class="text-xs text-gray-500">Student Home</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Order Summary Box -->
+                <div class="border-t border-gray-200 pt-6">
+                    <h3 class="font-bold text-gray-900 text-lg mb-4">Order Summary</h3>
+                    <div id="checkout-items-list" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                        <!-- Dynamically populated summary items -->
+                    </div>
+                    <div class="border-t border-gray-200 mt-4 pt-4 flex items-center justify-between text-xl font-extrabold">
+                        <span>Total Price:</span>
+                        <span id="checkout-total-price" class="text-yumgo">0 NTD</span>
+                    </div>
+                </div>
+
+                <!-- Place Order Action -->
+                <div class="pt-4">
+                    <button onclick="placeOrder()" class="w-full bg-yumgo hover:bg-yumgo-dark text-white text-xl font-extrabold py-4 rounded-2xl shadow-lg shadow-yumgo/30 transition transform active:scale-95">
+                        <i class="fa-solid fa-check-circle mr-2"></i> Place Order
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 6: ORDER CONFIRMATION -->
+        <section id="screen-confirmation" class="flex-1 flex flex-col items-center justify-center text-center py-12 max-w-2xl mx-auto w-full hidden animate-fade-in">
+            <div class="w-24 h-24 bg-yumgo-light text-yumgo rounded-full flex items-center justify-center text-5xl mb-6 shadow-inner animate-bounce">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h2 class="text-3xl sm:text-5xl font-extrabold text-gray-900 mb-2">Order placed successfully!</h2>
+            <p class="text-lg text-gray-600 mb-8">Thank you for ordering with YumGo!</p>
+
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 sm:p-8 w-full text-left space-y-4 mb-8">
+                <div class="flex justify-between border-b border-gray-100 pb-3">
+                    <span class="text-gray-500 font-medium">Customer Name:</span>
+                    <span id="conf-name" class="font-bold text-gray-900">Student</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-100 pb-3">
+                    <span class="text-gray-500 font-medium">Delivery Method:</span>
+                    <span id="conf-method" class="font-bold text-gray-900 capitalize">Delivery to School</span>
+                </div>
+                <div>
+                    <span class="text-gray-500 font-medium block mb-2">Ordered Items:</span>
+                    <div id="conf-items-list" class="space-y-2 bg-gray-50 p-4 rounded-2xl max-h-48 overflow-y-auto">
+                        <!-- Confirmed items -->
+                    </div>
+                </div>
+                <div class="border-t border-gray-200 pt-4 flex items-center justify-between text-xl font-extrabold">
+                    <span>Final Total:</span>
+                    <span id="conf-total" class="text-yumgo">0 NTD</span>
+                </div>
+            </div>
+
+            <button onclick="resetGame()" class="bg-yumgo hover:bg-yumgo-dark text-white text-xl font-bold px-8 py-4 rounded-2xl shadow-lg shadow-yumgo/30 transition transform active:scale-95">
+                <i class="fa-solid fa-rotate-right mr-2"></i> Back to Home
+            </button>
+        </section>
+
+        <!-- SCREEN 7: FOOD CREW CHALLENGE (Game 2) -->
+        <section id="screen-crew-challenge" class="flex-1 flex flex-col py-4 hidden animate-fade-in w-full">
+            <!-- Header bar for Game 2 -->
+            <div class="flex items-center justify-between mb-4 bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100">
+                <button onclick="switchScreen('home')" class="inline-flex items-center gap-2 text-yumgo font-bold text-sm hover:underline">
+                    <i class="fa-solid fa-arrow-left"></i> Game Selection
+                </button>
+                <div class="text-center">
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 flex items-center gap-2 justify-center">
+                        <i class="fa-solid fa-users-gear text-yumgo"></i> Food Crew Challenge
+                    </h2>
+                    <p class="text-xs text-gray-500">3-Player Simultaneous Classroom Challenge</p>
+                </div>
+                <button onclick="startCrewChallenge()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right"></i> Restart Round
+                </button>
+            </div>
+
+            <!-- Three-Player Split Screen Container -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1">
+                <!-- Player 1 Panel -->
+                <div id="panel-p1" class="bg-white rounded-3xl p-4 shadow-sm border-2 border-emerald-100 flex flex-col justify-between relative overflow-hidden">
+                    <!-- Dynamically rendered via JS -->
+                </div>
+                <!-- Player 2 Panel -->
+                <div id="panel-p2" class="bg-white rounded-3xl p-4 shadow-sm border-2 border-blue-100 flex flex-col justify-between relative overflow-hidden">
+                    <!-- Dynamically rendered via JS -->
+                </div>
+                <!-- Player 3 Panel -->
+                <div id="panel-p3" class="bg-white rounded-3xl p-4 shadow-sm border-2 border-purple-100 flex flex-col justify-between relative overflow-hidden">
+                    <!-- Dynamically rendered via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 8: FINAL SCOREBOARD (Game 2) -->
+        <section id="screen-scoreboard" class="flex-1 flex flex-col items-center justify-center text-center py-8 max-w-4xl mx-auto w-full hidden animate-fade-in">
+            <div class="w-20 h-20 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center text-4xl mb-4 shadow-inner animate-bounce">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-1">Challenge Completed!</h2>
+            <p id="winner-announcement" class="text-lg font-bold text-yumgo mb-6">Winner Announcement</p>
+
+            <!-- Scoreboard Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-8" id="scoreboard-panels">
+                <!-- Populated via JS -->
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button onclick="startCrewChallenge()" class="bg-yumgo hover:bg-yumgo-dark text-white text-lg font-extrabold px-8 py-4 rounded-2xl shadow-lg shadow-yumgo/30 transition transform active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> Play Again
+                </button>
+                <button onclick="switchScreen('home')" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-lg font-bold px-8 py-4 rounded-2xl transition">
+                    Game Selection
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CART MODAL / DRAWER -->
+    <div id="cart-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex justify-end transition-opacity">
+        <div class="bg-white w-full max-w-md h-full flex flex-col shadow-2xl animate-slide-left">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+                <div class="flex items-center gap-3">
+                    <div class="bg-yumgo text-white p-2.5 rounded-xl">
+                        <i class="fa-solid fa-cart-shopping text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-xl text-gray-900">Your Cart</h3>
+                        <p id="cart-item-count-subtitle" class="text-xs text-gray-500">0 items selected</p>
+                    </div>
+                </div>
+                <button onclick="closeCartModal()" class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 font-bold transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Cart Items Container -->
+            <div id="cart-items-container" class="flex-1 overflow-y-auto p-6 space-y-4">
+                <!-- Dynamically populated cart items -->
+            </div>
+
+            <!-- Cart Footer -->
+            <div class="p-6 border-t border-gray-200 bg-gray-50 space-y-4">
+                <div class="flex items-center justify-between text-lg font-bold">
+                    <span class="text-gray-600">Subtotal:</span>
+                    <span id="cart-subtotal-price" class="text-gray-900">0 NTD</span>
+                </div>
+                <div class="flex items-center justify-between text-2xl font-extrabold">
+                    <span class="text-gray-900">Total:</span>
+                    <span id="cart-total-price" class="text-yumgo">0 NTD</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <button onclick="closeCartModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3.5 px-4 rounded-2xl transition">
+                        Continue Shopping
+                    </button>
+                    <button onclick="proceedToCheckout()" id="checkout-btn" class="bg-yumgo hover:bg-yumgo-dark text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        Checkout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION TOAST -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-3">
+        <i class="fa-solid fa-circle-check text-yumgo text-xl"></i>
+        <span id="toast-message" class="font-semibold text-sm">Item added to cart!</span>
+    </div>
+
+    <!-- JAVASCRIPT GAME LOGIC -->
+    <script>
+        // Data Structure for Cuisines & Food Items
+        const cuisineData = [
+            {
+                id: 'american',
+                name: 'american',
+                icon: 'fa-burger',
+                bgGradient: 'from-amber-500 to-orange-600',
+                items: [
+                    { id: 'burger', name: 'burger', price: 120, image: 'images/burger.png' },
+                    { id: 'fries', name: 'fries', price: 60, image: 'images/fries.png' },
+                    { id: 'hotdog', name: 'hot dog', price: 90, image: 'images/hotdog.png' },
+                    { id: 'chickennuggets', name: 'chicken nuggets', price: 100, image: 'images/chickennuggets.png' }
+                ]
+            },
+            {
+                id: 'japanese',
+                name: 'japanese',
+                icon: 'fa-fish-fins',
+                bgGradient: 'from-red-500 to-rose-600',
+                items: [
+                    { id: 'sushi', name: 'sushi', price: 180, image: 'images/sushi.png' },
+                    { id: 'sushiroll', name: 'sushi roll', price: 150, image: 'images/sushiroll.png' },
+                    { id: 'ramen', name: 'ramen', price: 200, image: 'images/ramen.png' }
+                ]
+            },
+            {
+                id: 'taiwanese',
+                name: 'taiwanese',
+                icon: 'fa-bowl-rice',
+                bgGradient: 'from-emerald-600 to-teal-700',
+                items: [
+                    { id: 'braisedporkrice', name: 'braised pork rice', price: 80, image: 'images/braisedporkrice.png' },
+                    { id: 'scallionpancake', name: 'scallion pancake', price: 50, image: 'images/scallionpancake.png' },
+                    { id: 'guabao', name: 'gua bao', price: 75, image: 'images/guabao.png' },
+                    { id: 'shavedice', name: 'shaved ice', price: 90, image: 'images/shavedice.png' }
+                ]
+            },
+            {
+                id: 'italian',
+                name: 'italian',
+                icon: 'fa-pizza-slice',
+                bgGradient: 'from-orange-500 to-red-600',
+                items: [
+                    { id: 'pizza', name: 'pizza', price: 250, image: 'images/pizza.png' },
+                    { id: 'pasta', name: 'pasta', price: 180, image: 'images/pasta.png' }
+                ]
+            },
+            {
+                id: 'vietnamese',
+                name: 'vietnamese',
+                icon: 'fa-bowl-food',
+                bgGradient: 'from-blue-600 to-indigo-700',
+                items: [
+                    { id: 'beefpho', name: 'beef pho', price: 160, image: 'images/beefpho.png' },
+                    { id: 'banhmi', name: 'banh mi', price: 130, image: 'images/banhmi.png' },
+                    { id: 'springrolls', name: 'spring rolls', price: 90, image: 'images/springrolls.png' }
+                ]
+            }
+        ];
+
+        // Application State
+        let currentScreen = 'home';
+        let currentCuisineId = null;
+        let cart = {}; // key: foodId, value: { item object, quantity }
+
+        // Game 2 (Food Crew Challenge) State
+        let crewPlayers = [
+            { id: 1, name: 'Player 1', color: 'emerald', orders: [], currentOrderIndex: 0, stars: 0, selections: {}, submitted: false, feedback: null, correctCount: 0, incorrectCount: 0, finished: false, cuisineIndex: 0, viewState: 'cuisines', selectedCuisine: null },
+            { id: 2, name: 'Player 2', color: 'blue', orders: [], currentOrderIndex: 0, stars: 0, selections: {}, submitted: false, feedback: null, correctCount: 0, incorrectCount: 0, finished: false, cuisineIndex: 0, viewState: 'cuisines', selectedCuisine: null },
+            { id: 3, name: 'Player 3', color: 'purple', orders: [], currentOrderIndex: 0, stars: 0, selections: {}, submitted: false, feedback: null, correctCount: 0, incorrectCount: 0, finished: false, cuisineIndex: 0, viewState: 'cuisines', selectedCuisine: null }
+        ];
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCuisines();
+            updateCartUI();
+        });
+
+        // Screen Switching
+        function switchScreen(screenId) {
+            currentScreen = screenId;
+            const screens = ['home', 'cuisines', 'menu', 'checkout', 'confirmation', 'crew-challenge', 'scoreboard'];
+            screens.forEach(s => {
+                const el = document.getElementById(`screen-${s}`);
+                if (el) {
+                    if (s === screenId) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                }
+            });
+
+            // Toggle cart button visibility in top nav (only for Game 1 ordering screens)
+            const navCartBtn = document.getElementById('nav-cart-btn');
+            if (screenId === 'home' || screenId === 'crew-challenge' || screenId === 'scoreboard') {
+                navCartBtn.classList.add('hidden');
+            } else {
+                navCartBtn.classList.remove('hidden');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function startOrdering() {
+            switchScreen('cuisines');
+        }
+
+        // Render Cuisine Cards
+        function renderCuisines() {
+            const grid = document.getElementById('cuisine-grid');
+            grid.innerHTML = cuisineData.map(c => `
+                <button onclick="selectCuisine('${c.id}')" class="bg-white rounded-3xl p-6 shadow-sm hover:shadow-xl border border-gray-100 flex flex-col items-center text-center transition transform hover:-translate-y-1.5 active:translate-y-0 group cursor-pointer">
+                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br ${c.bgGradient} text-white flex items-center justify-center text-3xl mb-4 shadow-md group-hover:scale-110 transition duration-300">
+                        <i class="fa-solid ${c.icon}"></i>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-gray-900 capitalize mb-1">${c.name}</h3>
+                    <p class="text-sm text-gray-500">${c.items.length} delicious items available</p>
+                    <span class="mt-4 inline-flex items-center gap-2 text-yumgo font-bold text-sm bg-yumgo-light px-4 py-2 rounded-xl group-hover:bg-yumgo group-hover:text-white transition">
+                        Browse Menu <i class="fa-solid fa-arrow-right"></i>
+                    </span>
+                </button>
+            `).join('');
+        }
+
+        // Select Cuisine & Open Menu
+        function selectCuisine(cuisineId) {
+            currentCuisineId = cuisineId;
+            const cuisine = cuisineData.find(c => c.id === cuisineId);
+            if (!cuisine) return;
+
+            document.getElementById('menu-cuisine-title').innerText = `${cuisine.name} Menu`;
+            renderFoodGrid(cuisine);
+            updateSentenceHelper();
+            switchScreen('menu');
+        }
+
+        // Render Food Menu Grid
+        function renderFoodGrid(cuisine) {
+            const grid = document.getElementById('food-grid');
+            grid.innerHTML = cuisine.items.map(item => {
+                const qty = cart[item.id] ? cart[item.id].quantity : 0;
+                return `
+                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 flex flex-col justify-between transition hover:shadow-md">
+                        <div>
+                            <div class="w-full h-48 bg-gray-100 rounded-2xl overflow-hidden mb-4 flex items-center justify-center relative group">
+                                <img src="${item.image}" alt="${item.name}" class="w-full h-full object-contain p-4 transition transform group-hover:scale-105" onerror="this.onerror=null; this.src='https://placehold.co/300x300/e6f8ef/06c167?text=${encodeURIComponent(item.name)}';">
+                                <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-gray-800 shadow-sm">
+                                    ${item.price} NTD
+                                </div>
+                            </div>
+                            <h3 class="text-xl font-extrabold text-gray-900 capitalize mb-1">${item.name}</h3>
+                            <p class="text-xs text-gray-500 uppercase tracking-wider">${cuisine.name} Cuisine</p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
+                            <span class="font-bold text-yumgo text-lg">${item.price * (qty || 1)} NTD</span>
+                            ${qty === 0 ? `
+                                <button onclick="addToCart('${item.id}')" class="bg-yumgo hover:bg-yumgo-dark text-white font-bold px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 active:scale-95">
+                                    <i class="fa-solid fa-plus"></i> Add to Cart
+                                </button>
+                            ` : `
+                                <div class="flex items-center gap-3 bg-yumgo-light px-3 py-2 rounded-xl">
+                                    <button onclick="updateQuantity('${item.id}', -1)" class="w-8 h-8 rounded-lg bg-white text-yumgo font-bold shadow-sm flex items-center justify-center hover:bg-yumgo hover:text-white transition">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+                                    <span class="font-extrabold text-gray-900 w-6 text-center">${qty}</span>
+                                    <button onclick="updateQuantity('${item.id}', 1)" class="w-8 h-8 rounded-lg bg-yumgo text-white font-bold shadow-sm flex items-center justify-center hover:bg-yumgo-dark transition">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Cart Operations
+        function addToCart(itemId) {
+            let itemObj = null;
+            for (const c of cuisineData) {
+                const found = c.items.find(i => i.id === itemId);
+                if (found) {
+                    itemObj = found;
+                    break;
+                }
+            }
+            if (!itemObj) return;
+
+            if (cart[itemId]) {
+                cart[itemId].quantity += 1;
+            } else {
+                cart[itemId] = { ...itemObj, quantity: 1 };
+            }
+
+            showToast(`Added ${itemObj.name} to cart!`);
+            refreshCurrentView();
+        }
+
+        function updateQuantity(itemId, change) {
+            if (!cart[itemId]) return;
+            cart[itemId].quantity += change;
+            if (cart[itemId].quantity <= 0) {
+                delete cart[itemId];
+                showToast(`Removed item from cart.`);
+            } else {
+                showToast(`Updated quantity.`);
+            }
+            refreshCurrentView();
+        }
+
+        function refreshCurrentView() {
+            updateCartUI();
+            if (currentScreen === 'menu' && currentCuisineId) {
+                const cuisine = cuisineData.find(c => c.id === currentCuisineId);
+                if (cuisine) renderFoodGrid(cuisine);
+            } else if (currentScreen === 'checkout') {
+                renderCheckoutSummary();
+            }
+            updateSentenceHelper();
+        }
+
+        // UI Refreshers & Helpers
+        function updateCartUI() {
+            let totalCount = 0;
+            let subtotal = 0;
+
+            for (const id in cart) {
+                totalCount += cart[id].quantity;
+                subtotal += cart[id].price * cart[id].quantity;
+            }
+
+            // Update Badge
+            const badge = document.getElementById('cart-badge');
+            badge.innerText = totalCount;
+            if (totalCount > 0) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            // Update Subtitle & Totals
+            document.getElementById('cart-item-count-subtitle').innerText = `${totalCount} item${totalCount === 1 ? '' : 's'} selected`;
+            document.getElementById('cart-subtotal-price').innerText = `${subtotal} NTD`;
+            document.getElementById('cart-total-price').innerText = `${subtotal} NTD`;
+
+            // Checkout button state
+            const checkoutBtn = document.getElementById('checkout-btn');
+            if (totalCount > 0) {
+                checkoutBtn.removeAttribute('disabled');
+            } else {
+                checkoutBtn.setAttribute('disabled', 'true');
+            }
+
+            // Render Cart Items
+            const container = document.getElementById('cart-items-container');
+            if (totalCount === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 space-y-4">
+                        <div class="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-3xl mx-auto">
+                            <i class="fa-solid fa-basket-shopping"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-800 text-lg">Your cart is empty</h4>
+                        <p class="text-sm text-gray-500">Add delicious food items from the menu to start your order.</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = Object.values(cart).map(item => `
+                    <div class="flex items-center justify-between bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <div class="flex items-center gap-3">
+                            <img src="${item.image}" alt="${item.name}" class="w-14 h-14 object-contain bg-white rounded-xl p-1 border border-gray-200" onerror="this.onerror=null; this.src='https://placehold.co/100x100/e6f8ef/06c167?text=${encodeURIComponent(item.name)}';">
+                            <div>
+                                <h4 class="font-extrabold text-gray-900 capitalize">${item.name}</h4>
+                                <span class="text-xs text-gray-500">${item.price} NTD each</span>
+                                <span class="block font-bold text-yumgo text-sm mt-0.5">Subtotal: ${item.price * item.quantity} NTD</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="updateQuantity('${item.id}', -1)" class="w-8 h-8 rounded-lg bg-white text-gray-700 font-bold shadow-sm flex items-center justify-center border border-gray-200 hover:bg-gray-100 transition">
+                                <i class="fa-solid fa-minus text-xs"></i>
+                            </button>
+                            <span class="font-extrabold text-gray-900 w-6 text-center">${item.quantity}</span>
+                            <button onclick="updateQuantity('${item.id}', 1)" class="w-8 h-8 rounded-lg bg-yumgo text-white font-bold shadow-sm flex items-center justify-center hover:bg-yumgo-dark transition">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Cart Modal Controls
+        function openCartModal() {
+            document.getElementById('cart-modal').classList.remove('hidden');
+            updateCartUI();
+        }
+
+        function closeCartModal() {
+            document.getElementById('cart-modal').classList.add('hidden');
+        }
+
+        // Checkout Flow
+        function proceedToCheckout() {
+            closeCartModal();
+            renderCheckoutSummary();
+            switchScreen('checkout');
+        }
+
+        function renderCheckoutSummary() {
+            const listContainer = document.getElementById('checkout-items-list');
+            const items = Object.values(cart);
+            let total = 0;
+
+            listContainer.innerHTML = items.map(item => {
+                const sub = item.price * item.quantity;
+                total += sub;
+                return `
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="font-medium text-gray-800 capitalize"><strong class="text-yumgo">${item.quantity}x</strong> ${item.name}</span>
+                        <span class="font-bold text-gray-900">${sub} NTD</span>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('checkout-total-price').innerText = `${total} NTD`;
+        }
+
+        // Place Order
+        function placeOrder() {
+            const nameInput = document.getElementById('student-name-input').value.trim() || 'Student';
+            const methodInput = document.querySelector('input[name="delivery-method"]:checked').value;
+            const items = Object.values(cart);
+            let total = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+
+            document.getElementById('conf-name').innerText = nameInput;
+            document.getElementById('conf-method').innerText = methodInput;
+            document.getElementById('conf-total').innerText = `${total} NTD`;
+
+            const confList = document.getElementById('conf-items-list');
+            confList.innerHTML = items.map(i => `
+                <div class="flex justify-between text-sm">
+                    <span class="capitalize">${i.quantity}x ${i.name}</span>
+                    <span class="font-semibold">${i.price * i.quantity} NTD</span>
+                </div>
+            `).join('');
+
+            // Clear cart for next round
+            cart = {};
+            updateCartUI();
+
+            switchScreen('confirmation');
+        }
+
+        function resetGame() {
+            document.getElementById('student-name-input').value = '';
+            switchScreen('home');
+        }
+
+        // Dynamic ESL Sentence Helper Generator
+        function updateSentenceHelper() {
+            const helperEl = document.getElementById('sentence-helper-text');
+            const items = Object.values(cart);
+
+            if (items.length === 0) {
+                if (currentCuisineId) {
+                    const cuisine = cuisineData.find(c => c.id === currentCuisineId);
+                    helperEl.innerText = `"What food do you want?" → "I want to order ${cuisine.name.toLowerCase()} food."`;
+                } else {
+                    helperEl.innerText = `"What food do you want?" → "I want a burger, fries, and cola."`;
+                }
+            } else if (items.length === 1) {
+                const item = items[0];
+                if (item.quantity === 1) {
+                    helperEl.innerText = `"I want a ${item.name}, please."`;
+                } else {
+                    helperEl.innerText = `"I would like ${item.quantity} ${item.name}s, please."`;
+                }
+            } else {
+                const itemNames = items.map(i => `${i.quantity > 1 ? i.quantity + ' ' : 'a '}${i.name}`).join(', ');
+                const total = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+                helperEl.innerText = `"My order is ${itemNames}. My total is ${total} NTD."`;
+            }
+        }
+
+        // Notification Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-message');
+            msgEl.innerText = message;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 2500);
+        }
+
+        // ==========================================
+        // GAME 2: FOOD CREW CHALLENGE LOGIC
+        // ==========================================
+        
+        // Flatten all food items for Game 2 catalog (excluding drinks as requested)
+        function getAllFoodItems() {
+            let all = [];
+            cuisineData.forEach(c => {
+                all = all.concat(c.items);
+            });
+            return all;
+        }
+
+        // Generate 3 randomized orders for a player
+        function generatePlayerOrders() {
+            const allFoods = getAllFoodItems();
+            let orders = [];
+            for (let i = 0; i < 3; i++) {
+                // Pick 1 to 2 distinct items for the order
+                const numItems = Math.random() > 0.4 ? 2 : 1;
+                let shuffled = [...allFoods].sort(() => 0.5 - Math.random());
+                let orderItems = [];
+                for (let j = 0; j < numItems; j++) {
+                    const food = shuffled[j];
+                    const qty = Math.random() > 0.6 ? 2 : 1;
+                    orderItems.push({ ...food, quantity: qty });
+                }
+                orders.push(orderItems);
+            }
+            return orders;
+        }
+
+        function startCrewChallenge() {
+            crewPlayers.forEach(p => {
+                p.orders = generatePlayerOrders();
+                p.currentOrderIndex = 0;
+                p.stars = 0;
+                p.selections = {};
+                p.submitted = false;
+                p.feedback = null;
+                p.correctCount = 0;
+                p.incorrectCount = 0;
+                p.finished = false;
+                p.cuisineIndex = 0;
+                p.viewState = 'cuisines';
+                p.selectedCuisine = null;
+            });
+            renderCrewChallengeScreen();
+            switchScreen('crew-challenge');
+        }
+
+        function renderCrewChallengeScreen() {
+            crewPlayers.forEach(p => {
+                const container = document.getElementById(`panel-p${p.id}`);
+                if (!container) return;
+
+                if (p.finished) {
+                    container.innerHTML = `
+                        <div class="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-4">
+                            <div class="w-16 h-16 bg-yumgo-light text-yumgo rounded-full flex items-center justify-center text-3xl shadow-inner">
+                                <i class="fa-solid fa-check-to-slot"></i>
+                            </div>
+                            <h3 class="text-xl font-extrabold text-gray-900">${p.name} Finished!</h3>
+                            <p class="text-sm text-gray-600">All 3 orders completed successfully.</p>
+                            <div class="bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl text-amber-700 font-bold text-sm">
+                                Total Stars: ⭐ ${p.stars}
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const currentOrder = p.orders[p.currentOrderIndex];
+                const allFoods = getAllFoodItems();
+
+                // Build order description string for ESL prompt
+                const orderDesc = currentOrder.map(item => `${item.quantity > 1 ? item.quantity + ' ' : 'a '}${item.name}`).join(' and ');
+
+                // Render interior content based on player's viewState ('cuisines' or 'menu')
+                let selectionAreaHTML = '';
+                if (p.viewState === 'cuisines') {
+                    const currentCuisine = cuisineData[p.cuisineIndex];
+                    selectionAreaHTML = `
+                        <div class="flex-1 flex flex-col my-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-bold text-gray-600">Step 1: Choose Cuisine</span>
+                                <span class="text-[11px] text-gray-400 font-medium">${p.cuisineIndex + 1} of ${cuisineData.length}</span>
+                            </div>
+                            
+                            <!-- Cuisine Carousel with Arrow Buttons -->
+                            <div class="relative flex items-center bg-gray-50 rounded-2xl border border-gray-200 p-2 flex-1 justify-between">
+                                <button onclick="crewShiftCuisine(${p.id}, -1)" class="w-9 h-12 bg-white hover:bg-yumgo hover:text-white text-gray-700 rounded-xl shadow border border-gray-200 flex items-center justify-center font-bold text-base z-10 transition active:scale-95 shrink-0">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                
+                                <div class="flex flex-col items-center justify-center flex-1 px-2 text-center">
+                                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br ${currentCuisine.bgGradient} text-white flex items-center justify-center text-2xl mb-2 shadow-md">
+                                        <i class="fa-solid ${currentCuisine.icon}"></i>
+                                    </div>
+                                    <h4 class="text-lg font-extrabold text-gray-900 capitalize mb-2">${currentCuisine.name}</h4>
+                                    <button onclick="crewSelectCuisine(${p.id}, '${currentCuisine.id}')" ${p.submitted ? 'disabled' : ''} class="bg-yumgo hover:bg-yumgo-dark text-white font-bold px-4 py-2 rounded-xl text-xs shadow transition flex items-center gap-1.5 active:scale-95 cursor-pointer">
+                                        Select Menu <i class="fa-solid fa-arrow-right"></i>
+                                    </button>
+                                </div>
+
+                                <button onclick="crewShiftCuisine(${p.id}, 1)" class="w-9 h-12 bg-white hover:bg-yumgo hover:text-white text-gray-700 rounded-xl shadow border border-gray-200 flex items-center justify-center font-bold text-base z-10 transition active:scale-95 shrink-0">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const cuisine = cuisineData.find(c => c.id === p.selectedCuisine);
+                    selectionAreaHTML = `
+                        <div class="flex-1 flex flex-col my-1">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <button onclick="crewBackToCuisines(${p.id})" class="inline-flex items-center gap-1 text-yumgo font-bold text-xs hover:underline">
+                                    <i class="fa-solid fa-arrow-left"></i> Back to Cuisines
+                                </button>
+                                <span class="text-xs font-bold text-gray-600 capitalize">${cuisine.name} Menu</span>
+                            </div>
+                            
+                            <!-- Food selection grid with Arrow Navigation Buttons for touchscreen -->
+                            <div class="relative flex items-center bg-gray-50 rounded-2xl border border-gray-200 p-1 flex-1">
+                                <button onclick="crewScrollMenu(${p.id}, -1)" class="w-8 h-10 bg-white hover:bg-yumgo hover:text-white text-gray-700 rounded-xl shadow border border-gray-200 flex items-center justify-center font-bold text-sm z-10 transition active:scale-95 shrink-0">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                
+                                <div id="crew-menu-scroll-${p.id}" class="flex gap-2 overflow-x-auto px-2 py-1 scroll-smooth flex-1 no-scrollbar items-center">
+                                    ${cuisine.items.map(food => {
+                                        const selQty = p.selections[food.id] || 0;
+                                        return `
+                                            <button onclick="crewSelectItem(${p.id}, '${food.id}')" ${p.submitted ? 'disabled' : ''} class="min-w-[85px] max-w-[85px] bg-white p-2 rounded-xl border ${selQty > 0 ? 'border-yumgo bg-yumgo-light ring-2 ring-yumgo/30' : 'border-gray-200 hover:border-gray-300'} flex flex-col items-center text-center transition relative cursor-pointer group active:scale-95 shrink-0 shadow-sm">
+                                                ${selQty > 0 ? `<span class="absolute -top-1.5 -right-1.5 bg-yumgo text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow">${selQty}</span>` : ''}
+                                                <img src="${food.image}" alt="${food.name}" class="w-10 h-10 object-contain mb-1 group-hover:scale-105 transition" onerror="this.onerror=null; this.src='https://placehold.co/100x100/e6f8ef/06c167?text=food';">
+                                                <span class="text-[10px] font-bold text-gray-800 capitalize leading-tight truncate w-full">${food.name}</span>
+                                            </button>
+                                        `;
+                                    }).join('')}
+                                </div>
+
+                                <button onclick="crewScrollMenu(${p.id}, 1)" class="w-8 h-10 bg-white hover:bg-yumgo hover:text-white text-gray-700 rounded-xl shadow border border-gray-200 flex items-center justify-center font-bold text-sm z-10 transition active:scale-95 shrink-0">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = `
+                    <!-- Panel Top Header -->
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                        <span class="font-extrabold text-lg text-gray-900 flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-${p.color}-500 inline-block"></span> ${p.name}
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-amber-50 text-amber-600 font-extrabold px-3 py-1 rounded-xl text-xs border border-amber-200 shadow-sm">
+                                ⭐ ${p.stars} Stars
+                            </span>
+                            <span class="bg-gray-100 text-gray-600 font-bold px-3 py-1 rounded-xl text-xs">
+                                Order ${p.currentOrderIndex + 1} of 3
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Customer Order Card -->
+                    <div class="my-3 bg-gradient-to-br from-gray-50 to-emerald-50/40 p-3.5 rounded-2xl border border-emerald-100/60 shadow-sm">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs font-bold text-yumgo uppercase tracking-wider flex items-center gap-1">
+                                <i class="fa-solid fa-bullhorn"></i> customer order
+                            </span>
+                            <span class="text-[11px] text-gray-400 italic">"I want to order..."</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                            ${currentOrder.map(item => `
+                                <div class="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-xl border border-gray-200 shadow-sm">
+                                    <img src="${item.image}" alt="${item.name}" class="w-6 h-6 object-contain" onerror="this.onerror=null; this.src='https://placehold.co/50x50/e6f8ef/06c167?text=food';">
+                                    <span class="text-xs font-bold text-gray-800 capitalize"><span class="text-yumgo">${item.quantity}x</span>${item.name}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <!-- ESL Speaking Practice Prompt -->
+                        <div class="text-[11px] bg-white/80 border border-gray-200/60 px-2.5 py-1 rounded-lg text-gray-600 italic flex items-center gap-1.5">
+                            <i class="fa-solid fa-comment-dots text-yumgo"></i> Say: "Here is your ${orderDesc}!"
+                        </div>
+                    </div>
+
+                    <!-- Food Selection Area (Cuisine Carousel -> Menu Layout with Arrows) -->
+                    ${selectionAreaHTML}
+
+                    <!-- Selected Items Summary & Quantity Controls -->
+                    <div class="my-2 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+                        <div class="flex items-center justify-between text-xs font-bold text-gray-700 mb-1">
+                            <span>Your Selection:</span>
+                            ${Object.keys(p.selections).length > 0 && !p.submitted ? `<button onclick="crewClearSelections(${p.id})" class="text-red-500 hover:underline text-[11px]">Clear All</button>` : ''}
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 min-h-[32px] items-center">
+                            ${Object.keys(p.selections).length === 0 ? '<span class="text-xs text-gray-400 italic">No items selected yet. Tap cuisine above.</span>' : 
+                                Object.entries(p.selections).map(([id, qty]) => {
+                                    const food = allFoods.find(f => f.id === id);
+                                    return `
+                                        <div class="flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-gray-200 text-xs shadow-sm">
+                                            <span class="capitalize font-semibold text-gray-800">${qty}x ${food.name}</span>${!p.submitted ? `
+                                                <button onclick="crewAdjustQty(${p.id}, '${id}', -1)" class="w-4 h-4 bg-gray-100 hover:bg-gray-200 rounded text-gray-600 font-bold flex items-center justify-center text-[10px]"><i class="fa-solid fa-minus"></i></button>
+                                                <button onclick="crewAdjustQty(${p.id}, '${id}', 1)" class="w-4 h-4 bg-yumgo text-white rounded font-bold flex items-center justify-center text-[10px]"><i class="fa-solid fa-plus"></i></button>
+                                            ` : ''}
+                                        </div>
+                                    `;
+                                }).join('')
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Feedback Banner & Exaggerated Star Explosion / Crying Emoji Animation -->
+                    ${p.feedback ? `
+                        <div class="my-2 p-2.5 rounded-xl text-center text-xs font-extrabold relative overflow-hidden ${p.feedback.correct ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}">
+                            ${p.feedback.correct ? `
+                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                                    <div class="flex gap-1 text-3xl animate-star-explode">⭐ ⭐ ⭐ ⭐ ⭐</div>
+                                </div>
+                            ` : `
+                                <div class="text-3xl mb-1 animate-bounce">😢</div>
+                            `}
+                            <div class="relative z-10">${p.feedback.message} <span class="block text-[11px] mt-0.5">${p.feedback.reward}</span></div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Action Button Area -->
+                    <div class="pt-1">
+                        ${!p.submitted ? `
+                            <button onclick="crewDeliverOrder(${p.id})" class="w-full bg-yumgo hover:bg-yumgo-dark text-white font-extrabold py-2.5 px-4 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-2 active:scale-95">
+                                <i class="fa-solid fa-truck-fast"></i> Deliver Order
+                            </button>
+                        ` : `
+                            <button onclick="crewNextOrder(${p.id})" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-extrabold py-2.5 px-4 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-2 active:scale-95 animate-pulse">
+                                <i class="fa-solid fa-arrow-right"></i> Next Order
+                            </button>
+                        `}
+                    </div>
+                `;
+            });
+        }
+
+        function crewShiftCuisine(playerId, direction) {
+            const player = crewPlayers.find(p => p.id === playerId);
+            if (!player || player.submitted || player.finished) return;
+
+            player.cuisineIndex += direction;
+            if (player.cuisineIndex < 0) {
+                player.cuisineIndex = cuisineData.length - 1;
+            } else if (player.cuisineIndex >= cuisineData.length) {
+                player.cuisineIndex = 0;
+            }
+            renderCrewChallengeScreen();
+        }
+
+        function crewSelectCuisine(playerId, cuisineId) {
+            const player = crewPlayers.find(p => p.id === playerId);
+            if (!player || player.submitted || player.finished) return;
+
+            player.viewState = 'menu';
+            player.selectedCuisine = cuisineId;
+            renderCrewChallengeScreen();
+        }
+
+        function crewBackToCuisines(playerId) {
+            const player = crewPlayers.find(p => p.id === playerId);
+            if (!player || player.submitted || player.finished) return;
+
+            player.viewState = 'cuisines';
+            player.selectedCuisine = null;
+            renderCrewChallengeScreen();
+        }
+
+        function crewScrollMenu(playerId, direction) {
+            const scrollContainer = document.getElementById(`crew-menu-scroll-${playerId}`);
+            if (scrollContainer) {
+                scrollContainer.scrollBy({ left: direction * 120, behavior: 'smooth' });
+            }
+        }
+
+        function crewSelectItem(playerId, foodId) {
+            const player = crewPlayers.find(p => p.id === playerId);
+            if (!player || player.submitted || player.finished) return;
+
+            if (player.selections[foodId]) {
+                player.selections[foodId] += 1;
+            } else {
+                player.selections[foodId] = 1;
+            }
+            renderCrewChallengeScreen();
+        }
+
+        function crewAdjustQty(playerId, foodId, change) {
+            const player = crewPlayers.find(p => p.id === playerId);
+            if (!player || player.submitted || player.finished) return;
+
+            if (player.selections[foodId]) {
+                player.selections[foodId] += change;
+                if (player.selections[foodId] <= 0) {
+                    delete player.selections[foodId];
+                }
+            }
+            renderCrewChallengeScreen();
+        }
+
+        function crewClearSelections(playerId) {
+            const player = crewPlayers.find(p => p.id === playerId);
+            if (!player || player.submitted || player.finished) return;
+
+            player.selections = {};
+            renderCrewChallengeScreen();
+        }
+
+        function crewDeliverOrder(playerId) {
+            const player = crewPlayers.find(p => p.id === playerId);
+            if (!player || player.submitted || player.finished) return;
+
+            const currentOrder = player.orders[player.currentOrderIndex];
+            
+            // Validate order
+            let isCorrect = true;
+            let reqMap = {};
+            currentOrder.forEach(item => {
+                reqMap[item.id] = item.quantity;
+            });
+
+            let selKeys = Object.keys(player.selections);
+            let reqKeys = Object.keys(reqMap);
+
+            if (selKeys.length !== reqKeys.length) {
+                isCorrect = false;
+            } else {
+                for (let k of selKeys) {
+                    if (player.selections[k] !== reqMap[k]) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+            }
+
+            player.submitted = true;
+
+            if (isCorrect) {
+                player.stars += 5;
+                player.correctCount += 1;
+                player.feedback = {
+                    correct: true,
+                    message: '🎉 Great job! Order delivered!',
+                    reward: '+5 stars ⭐'
+                };
+            } else {
+                player.stars += 1;
+                player.incorrectCount += 1;
+                player.feedback = {
+                    correct: false,
+                    message: 'Oops! Check the order again!',
+                    reward: '+1 star ⭐'
+                };
+            }
+
+            renderCrewChallengeScreen();
+        }
+
+        function crewNextOrder(playerId) {
+            const player = crewPlayers.find(p => p.id === playerId);
+            if (!player) return;
+
+            player.currentOrderIndex += 1;
+            player.selections = {};
+            player.submitted = false;
+            player.feedback = null;
+            player.viewState = 'cuisines';
+            player.selectedCuisine = null;
+
+            if (player.currentOrderIndex >= 3) {
+                player.finished = true;
+            }
+
+            renderCrewChallengeScreen();
+
+            // Check if all players have finished
+            if (crewPlayers.every(p => p.finished)) {
+                setTimeout(showScoreboard, 600);
+            }
+        }
+
+        function showScoreboard() {
+            const panelsContainer = document.getElementById('scoreboard-panels');
+            
+            // Determine max score and winner
+            let maxStars = -1;
+            crewPlayers.forEach(p => {
+                if (p.stars > maxStars) maxStars = p.stars;
+            });
+
+            let winners = crewPlayers.filter(p => p.stars === maxStars);
+            let winnerText = '';
+            if (winners.length === 1) {
+                winnerText = `🏆 Winner: ${winners[0].name} with ${winners[0].stars} Stars!`;
+            } else {
+                winnerText = `🤝 It's a Tie! Multiple players scored ${maxStars} Stars!`;
+            }
+            document.getElementById('winner-announcement').innerText = winnerText;
+
+            panelsContainer.innerHTML = crewPlayers.map(p => {
+                const isWinner = p.stars === maxStars;
+                return `
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border-2 ${isWinner ? 'border-amber-400 bg-amber-50/30 ring-4 ring-amber-400/20' : 'border-gray-100'} flex flex-col items-center text-center relative">
+                        ${isWinner ? '<span class="absolute -top-3 bg-amber-500 text-white font-extrabold text-xs px-3 py-1 rounded-full shadow"><i class="fa-solid fa-crown mr-1"></i> Winner</span>' : ''}
+                        <div class="w-16 h-16 rounded-2xl bg-yumgo-light text-yumgo flex items-center justify-center text-2xl font-extrabold mb-3 shadow-inner">
+                            P${p.id}
+                        </div>
+                        <h3 class="text-xl font-extrabold text-gray-900 mb-1">${p.name}</h3>
+                        <div class="text-2xl font-black text-amber-500 mb-4">⭐ ${p.stars} Stars</div>
+                        
+                        <div class="w-full space-y-2 text-left bg-gray-50 p-4 rounded-2xl border border-gray-200 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Orders Completed:</span>
+                                <span class="font-bold text-gray-900">3 / 3</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Correct Deliveries (+5):</span>
+                                <span class="font-bold text-emerald-600">${p.correctCount}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Incorrect Deliveries (+1):</span>
+                                <span class="font-bold text-amber-600">${p.incorrectCount}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            switchScreen('scoreboard');
+        }
+    </script>
+</body>
+</html>
